@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-const API_BASE = 'http://localhost:8000';
+// Use /api as base URL - nginx will proxy to backend
+const API_BASE = '/api';
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');

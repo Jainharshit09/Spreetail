@@ -12,7 +12,7 @@ services:
       - DEBUG=${DEBUG:-False}
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost,http://localhost:3000}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://localhost:3000,http://localhost:5173}
       - DJANGO_LOG_LEVEL=${DJANGO_LOG_LEVEL:-INFO}
       - SECURE_SSL_REDIRECT=${SECURE_SSL_REDIRECT:-False}
       - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-False}
@@ -30,8 +30,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    depends_on:
-      - db
     networks:
       - shared-expenses-net
 
@@ -53,15 +51,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    networks:
-      - shared-expenses-net
-
-  db:
-    image: sqlite:latest
-    container_name: shared-expenses-db
-    volumes:
-      - db_data:/data
-    # Note: SQLite is file-based, so we don't expose ports
     networks:
       - shared-expenses-net
 
