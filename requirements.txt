@@ -5,8 +5,4 @@ python-dateutil==2.9.0.post0
 gunicorn==23.0.0
 whitenoise==6.7.0
 python-dotenv==1.0.0
-<<<<<<< HEAD
 openpyxl==3.1.2
-=======
-openpyxl
->>>>>>> b63ce5b308410698571f4a2fea1efe95c3f9c1dc
