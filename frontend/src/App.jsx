@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_BASE = window.location.origin;
+const API_BASE = '/api';
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
