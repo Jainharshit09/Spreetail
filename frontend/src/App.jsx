@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react';
 
-<<<<<<< HEAD
-// Use /api as base URL - nginx will proxy to backend
-const API_BASE = '/api';
-=======
-const API_BASE = window.location.origin;
->>>>>>> b63ce5b308410698571f4a2fea1efe95c3f9c1dc
+// Prefer VITE_API_URL when provided; normalize to remove any trailing `/api`.
+// This ensures endpoints like '/api/auth/...' are not duplicated into '/api/api/...'.
+const rawApiBase = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
+  ? import.meta.env.VITE_API_URL
+  : '';
+// Remove trailing slashes and a trailing '/api' segment if present
+const API_BASE = rawApiBase
+  ? rawApiBase.replace(/\/+$/g, '').replace(/\/api$/i, '')
+  : '';
+
+const joinUrl = (base, path) => {
+  if (!base) return path;
+  const b = base.replace(/\/+$/g, '');
+  let p = path.replace(/^\/+/, '');
+  // If both base and path include the 'api' segment (e.g. base ends with 'api' and
+  // path starts with 'api/...'), collapse them into a single 'api' to avoid '/api/api'.
+  if (/\bapi$/.test(b) && /^api(\/|$)/.test(p)) {
+    p = p.replace(/^api\/?/, '');
+  }
+  return `${b}/${p}`;
+};
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -45,7 +60,7 @@ export default function App() {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/auth/me/`, {
+      const res = await fetch(joinUrl(API_BASE, '/api/auth/me/'), {
         headers: { 'Authorization': `Token ${token}` }
       });
       if (res.ok) {
@@ -63,7 +78,7 @@ export default function App() {
     e.preventDefault();
     const endpoint = isSignUp ? '/api/auth/register/' : '/api/auth/login/';
     try {
-      const res = await fetch(`${API_BASE}${endpoint}`, {
+      const res = await fetch(joinUrl(API_BASE, endpoint), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -92,7 +107,7 @@ export default function App() {
   // Load Groups
   const fetchGroups = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/groups/`, {
+      const res = await fetch(joinUrl(API_BASE, '/api/groups/'), {
         headers: { 'Authorization': `Token ${token}` }
       });
       if (res.ok) {
@@ -118,7 +133,7 @@ export default function App() {
   const fetchBalances = async () => {
     if (!activeGroupId) return;
     try {
-      const res = await fetch(`${API_BASE}/api/groups/${activeGroupId}/balances/`, {
+      const res = await fetch(joinUrl(API_BASE, `/api/groups/${activeGroupId}/balances/`), {
         headers: { 'Authorization': `Token ${token}` }
       });
       if (res.ok) {
@@ -143,7 +158,7 @@ export default function App() {
   const fetchLedger = async () => {
     if (!activeGroupId || !activeLedgerMember) return;
     try {
-      const res = await fetch(`${API_BASE}/api/groups/${activeGroupId}/breakdown/?username=${activeLedgerMember}`, {
+      const res = await fetch(joinUrl(API_BASE, `/api/groups/${activeGroupId}/breakdown/?username=${activeLedgerMember}`), {
         headers: { 'Authorization': `Token ${token}` }
       });
       if (res.ok) {
@@ -190,7 +205,7 @@ export default function App() {
     formData.append('file', file);
     showToast('Analyzing and cleaning file...', 'info');
     try {
-      const res = await fetch(`${API_BASE}/api/import/preview/`, {
+      const res = await fetch(joinUrl(API_BASE, '/api/import/preview/'), {
         method: 'POST',
         headers: { 'Authorization': `Token ${token}` },
         body: formData
@@ -212,7 +227,7 @@ export default function App() {
     setIsConfirmOpen(false);
     showToast('Confirming and building shared ledger database...', 'info');
     try {
-      const res = await fetch(`${API_BASE}/api/import/confirm/`, {
+      const res = await fetch(joinUrl(API_BASE, '/api/import/confirm/'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
