@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-<<<<<<< HEAD
 // Prefer VITE_API_URL when provided; normalize to remove any trailing `/api`.
 // This ensures endpoints like '/api/auth/...' are not duplicated into '/api/api/...'.
 const rawApiBase = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
@@ -22,9 +21,7 @@ const joinUrl = (base, path) => {
   }
   return `${b}/${p}`;
 };
-=======
-const API_BASE = '/api';
->>>>>>> 2f074fec95e4eab9170acc808c6f138f55728274
+
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
