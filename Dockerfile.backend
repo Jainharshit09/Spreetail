@@ -37,15 +37,18 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p /app/staticfiles /app/tmp
 
-# Collect static files
-RUN python manage.py collectstatic --noinput --clear
+# Do not collect static at build time; run at container start (entrypoint)
 
 # Expose port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/admin/').getcode()" || exit 1
+# Copy entrypoint script and make executable
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
-# Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "sync", "--max-requests", "1000", "--max-requests-jitter", "100", "--timeout", "60", "expenses_app.wsgi:application"]
+# Health check (will use default port 8000)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import os,urllib.request; p=os.environ.get('PORT','8000'); urllib.request.urlopen(f'http://localhost:{p}/admin/').getcode()" || exit 1
+
+# Use entrypoint which runs migrations, collectstatic and starts gunicorn on $PORT
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
